@@ -205,6 +205,9 @@ Final-year B.Tech project — 3-person team, hardware-split by role:
 
 See `docs/architecture.md` and per-member environment setup notes in the team build plan for exact dependency versions and Windows-specific fixes (CUDA toolkit, gitignore patterns, package version pins).
 
+## UI
+Work in Progress...
+
 ```bash
 pip install -r requirements.txt
 ollama pull qwen2.5:7b-instruct-q4_K_M
