@@ -78,3 +78,23 @@ export const HERO_METRICS = [
   { label: "Min VRAM required", value: "6GB" },
   { label: "DPO improvement", value: "2.6x" },
 ];
+
+export const TECH_STACK = [
+  "LangGraph", "Unsloth (QLoRA)", "TRL (SFT + DPO)", "Docker",
+  "llama.cpp (GGUF)", "FastAPI", "Next.js", "Tailwind CSS",
+  "Recharts", "Weights & Biases", "Ollama", "Groq/Gemini API",
+];
+
+export const BUGS_FOUND = [
+  { title: "Windows Unsloth crash", detail: "Fused cross-entropy loss returned near-zero free memory on WDDM, crashing training. Fixed via a targeted monkey-patch (upstream issue #3827)." },
+  { title: "Package shadowing", detail: "Local datasets/ and docker/ folders silently shadowed the pip packages of the same name." },
+  { title: "Silent false-positive verification", detail: "HumanEval's check() function was never invoked under pytest, and MBPP's bare-assert tests weren't pytest-discoverable — both silently reported success regardless of actual code correctness." },
+  { title: "Function-name mismatches", detail: "Coder/debugger prompts weren't strict enough about matching exact test function names, causing repeated NameErrors across all retries." },
+  { title: "Gitignore directory-vs-contents", detail: "Patterns like models/ exclude the whole directory as a unit, silently blocking ! negation exceptions meant to track specific files inside." },
+];
+
+export const TEAM = [
+  { name: "Yeshita Motwani", role: "Model Training & Distillation Lead", github: "YeshitaMotwani" },
+  { name: "Faiza Bagban", role: "Dataset Pipeline & Primary Training Lead", github: "Faiza-Bagban" },
+  { name: "Sakshi Kolhe", role: "Systems, Sandbox & Inference Lead", github: "SakshiKolhe-3095" },
+];
