@@ -6,12 +6,18 @@ export default function GenerateButton({ onClick, status }) {
   const [showDone, setShowDone] = useState(false);
 
   useEffect(() => {
-    if (status === "done") {
-      setShowDone(true);
-      const t = setTimeout(() => setShowDone(false), 2000);
-      return () => clearTimeout(t);
+    if (status !== "done") {
+      const hideTimeout = setTimeout(() => setShowDone(false), 0);
+      return () => clearTimeout(hideTimeout);
     }
-    setShowDone(false);
+
+    const showTimeout = setTimeout(() => setShowDone(true), 0);
+    const resetTimeout = setTimeout(() => setShowDone(false), 2000);
+
+    return () => {
+      clearTimeout(showTimeout);
+      clearTimeout(resetTimeout);
+    };
   }, [status]);
 
   const label = status === "loading" ? "Generating..." : showDone ? "Completed" : "Generate Code";

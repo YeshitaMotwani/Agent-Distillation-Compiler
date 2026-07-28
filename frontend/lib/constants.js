@@ -41,3 +41,40 @@ export const EXAMPLE_PROBLEMS = [
   { title: "LRU Cache", problem: "Design a Least Recently Used (LRU) cache with O(1) get and put operations." },
   { title: "Sudoku Solver", problem: "Write a function that solves a 9x9 Sudoku puzzle by filling empty cells." },
 ];
+
+export const PASS_AT_1_DATA = [
+  { name: "Ablation (rank 8)", passAt1: 88.2 },
+  { name: "Primary (rank 32)", passAt1: 87.5 },
+  { name: "Secondary (Llama3.1-8B)", passAt1: 31.2 },
+];
+
+export const LATENCY_COMPARISON = [
+  { name: "Teacher (4+ calls)", calls: 4 },
+  { name: "Student (1 call)", calls: 1 },
+];
+
+export const VRAM_DATA = [
+  { name: "Yeshita\n(RTX 4050)", vram: 5.997 },
+  { name: "Faiza\n(RTX 5070)", vram: 7.997 },
+  { name: "Sakshi\n(RTX 4050)", vram: 5.997 },
+];
+
+export const BACKEND_SPEED_DATA = [
+  { name: "CUDA (discrete)", prompt: 536.5, gen: 31.1 },
+  { name: "Vulkan (discrete)", prompt: 352.0, gen: 27.4 },
+  { name: "Vulkan (iGPU, partial)", prompt: 7.3, gen: 5.2 },
+];
+
+export const DPO_IMPROVEMENT = [
+  { stage: "Before DPO", rewardAccuracy: 22.5 },
+  { stage: "After DPO", rewardAccuracy: 58.8 },
+];
+
+export const ROUTER_ACCURACY = { value: 70.4, correct: 76, total: 108 };
+
+export const HERO_METRICS = [
+  { label: "Best pass@1", value: "88.2%" },
+  { label: "Model calls reduced", value: "4x fewer" },
+  { label: "Min VRAM required", value: "6GB" },
+  { label: "DPO improvement", value: "2.6x" },
+];
