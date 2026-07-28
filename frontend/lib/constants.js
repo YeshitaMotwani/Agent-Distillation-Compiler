@@ -34,3 +34,10 @@ export const HERO_STATS = [
   { label: "Generation speedup", value: 3.4, suffix: "x" },
   { label: "VRAM footprint", value: 6, suffix: "GB" },
 ];
+
+export const EXAMPLE_PROBLEMS = [
+  { title: "Two Sum", problem: "Given an array of integers and a target, return indices of the two numbers that add up to the target." },
+  { title: "Binary Search", problem: "Implement binary search on a sorted array, returning the index of the target or -1 if not found." },
+  { title: "LRU Cache", problem: "Design a Least Recently Used (LRU) cache with O(1) get and put operations." },
+  { title: "Sudoku Solver", problem: "Write a function that solves a 9x9 Sudoku puzzle by filling empty cells." },
+];

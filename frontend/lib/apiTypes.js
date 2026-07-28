@@ -1,16 +1,14 @@
 /**
  * @typedef {Object} GenerateRequest
  * @property {string} problem
- * @property {'auto'|'student'|'teacher'} [model]
+ * @property {number} [max_new_tokens]
  */
 
 /**
  * @typedef {Object} GenerateResponse
  * @property {string} code
- * @property {'student'|'teacher'} route
- * @property {number} latency_ms
- * @property {number} router_confidence
- * @property {boolean} [passed]
+ * @property {string} route
+ * @property {number} latency_seconds
  */
 
 export {};

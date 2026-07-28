@@ -134,9 +134,12 @@ sys.path.insert(0, _cwd)
 import torch
 from inference.router import ComplexityRouter
 
-ROUTER_PATH = "models/router.pkl"
-STUDENT_CHECKPOINT = "models/sakshi_llama31_8b_rank4/checkpoint-9"
-TEACHER_CHECKPOINT = "models/qlora-primary-dpo/checkpoint-7"
+_PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+ROUTER_PATH = os.path.join(_PROJECT_ROOT, "models", "router.pkl")
+STUDENT_CHECKPOINT = os.path.join(_PROJECT_ROOT, "models", "yeshita_ablation_rank16")
+TEACHER_CHECKPOINT = os.path.join(_PROJECT_ROOT, "models", "qlora-primary-dpo", "checkpoint-7")
+
 MAX_SEQ_LENGTH = 512
 
 
@@ -175,14 +178,47 @@ class HybridModelServer:
 
     def _load_teacher(self):
         if self._teacher_model is None:
-            print(f"Loading teacher model from {self.teacher_path}...")
-            self._teacher_model, self._teacher_tokenizer = FastLanguageModel.from_pretrained(
+            # Free student model's VRAM before loading teacher — both can't
+            # fit simultaneously on 6GB. Swap, don't stack.
+           import torch
+           import gc
+           del self.student_model
+           del self.student_tokenizer
+           self.student_model = None
+           self.student_tokenizer = None
+           gc.collect()
+           torch.cuda.empty_cache()
+          
+           gc.collect()
+           torch.cuda.empty_cache()
+           print(f"Loading teacher model from {self.teacher_path}...")
+           self._teacher_model, self._teacher_tokenizer = FastLanguageModel.from_pretrained(
                 model_name=self.teacher_path,
                 max_seq_length=self.max_seq_length,
                 load_in_4bit=True,
                 device_map={"": 0},
             )
-            FastLanguageModel.for_inference(self._teacher_model)
+           FastLanguageModel.for_inference(self._teacher_model)
+    def _load_student(self):
+        if self.student_model is None:
+            import torch
+            import gc
+            del self.teacher_model
+            del self.teacher_tokenizer
+            self.teacher_model = None
+            self.teacher_tokenizer = None
+            gc.collect()
+            torch.cuda.empty_cache()
+            gc.collect()
+            torch.cuda.empty_cache()
+            print(f"Reloading student model from {self.student_path}...")
+            self.student_model, self.student_tokenizer = FastLanguageModel.from_pretrained(
+                model_name=self.student_path,
+                max_seq_length=self.max_seq_length,
+                load_in_4bit=True,
+                device_map={"": 0},
+            )
+            FastLanguageModel.for_inference(self.student_model)
 
     def _generate(self, model, tokenizer, prompt: str, max_new_tokens: int = 512) -> str:
         inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
@@ -195,18 +231,15 @@ class HybridModelServer:
         generated = tokenizer.decode(outputs[0], skip_special_tokens=True)
         return generated[len(prompt):].strip()
 
-    def generate(self, problem: str, max_new_tokens: int = 512) -> dict:
-        """
-        Routes the problem and generates a solution.
-        Returns {"code": str, "route": "student"|"teacher"}.
-        """
-        route = self.router.predict(problem)
+    def generate(self, problem: str, max_new_tokens: int = 512, force_route: str = None) -> dict:
+        route = force_route if force_route in ("student", "teacher") else self.router.predict(problem)
         prompt = f"Problem:\n{problem}\n\nSolve this in Python."
 
         if route == "teacher":
             self._load_teacher()
             code = self._generate(self._teacher_model, self._teacher_tokenizer, prompt, max_new_tokens)
         else:
+            self._load_student()
             code = self._generate(self.student_model, self.student_tokenizer, prompt, max_new_tokens)
 
         return {"code": code, "route": route}
