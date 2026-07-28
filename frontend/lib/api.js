@@ -12,13 +12,13 @@ async function apiFetch(path, options = {}) {
 }
 
 /** @param {import('./apiTypes').GenerateRequest} params */
-export function generateCode({ problem, model = "auto" }) {
+export function generateCode({ problem, maxNewTokens = 1024, model = "auto" }) {
   return apiFetch("/generate", {
     method: "POST",
-    body: JSON.stringify({ problem, model }),
+    body: JSON.stringify({
+      problem,
+      max_new_tokens: maxNewTokens,
+      force_route: model === "auto" ? null : model,
+    }),
   });
-}
-
-export function getBenchmarks() {
-  return apiFetch("/benchmarks");
 }

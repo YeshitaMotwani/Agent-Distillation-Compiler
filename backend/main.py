@@ -13,6 +13,9 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from inference.serve import HybridModelServer
+from fastapi.middleware.cors import CORSMiddleware
+
+
 
 app = FastAPI(
     title="Agent Distillation Compiler API",
@@ -20,6 +23,13 @@ app = FastAPI(
     version="1.0.0",
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 server: HybridModelServer = None
 
 
@@ -27,11 +37,13 @@ server: HybridModelServer = None
 def load_models():
     global server
     server = HybridModelServer()
+    
 
 
 class GenerateRequest(BaseModel):
     problem: str
     max_new_tokens: int = 512
+    force_route: str | None = None
 
 
 class GenerateResponse(BaseModel):
@@ -52,7 +64,12 @@ def generate(request: GenerateRequest):
     if not request.problem.strip():
         raise HTTPException(status_code=400, detail="Problem cannot be empty.")
     t0 = time.time()
-    result = server.generate(request.problem, max_new_tokens=request.max_new_tokens)
+    try:
+        result = server.generate(request.problem, max_new_tokens=request.max_new_tokens, force_route="student")
+    except Exception as e:
+        # Teacher-route model swap can exceed 6GB VRAM on this hardware — fall back to student
+        print(f"Generation failed on route={request.force_route}, falling back to student: {e}")
+        result = server.generate(request.problem, max_new_tokens=request.max_new_tokens, force_route="student")
     latency = time.time() - t0
     return GenerateResponse(
         code=result["code"],
